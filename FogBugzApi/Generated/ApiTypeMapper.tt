@@ -1,0 +1,186 @@
+<#@ template language="C#" debug="True" #>
+<#@ output extension="cs" #>
+<#@ include file="T4Toolbox.tt" #>
+<#@ Assembly Name="System.Core.dll" #>
+<#@ Assembly Name="System.Linq.dll" #>
+<#@ Assembly Name="System.Xml.dll" #>
+<#@ Assembly Name="System.Xml.Linq.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#
+// Mappings in xml format
+var xdoc = XElement.Parse(@"
+<mappings>
+	<mapping src='FogBugzCaseApiObj' dst='FogBugzCase' apiEnumName='Cases'>
+		<fields>
+			<field type='int' srcName='ixBug' dstName='CaseId' />
+			<field type='int' srcName='ixStatus' dstName='StatusId' />
+			<field type='string' srcName='sTitle' dstName='Title' />
+			<field type='string' srcName='sStatus' dstName='Status' />
+			<field type='int' srcName='ixPersonResolvedBy' dstName='ResolveByPersonId' />
+			<field type='double' srcName='hrsOrigEst' dstName='HoursOriginalEstimate' />
+			<field type='double' srcName='hrsCurrEst' dstName='HoursCurrentEstimate' />
+			<field type='double' srcName='hrsElapsed' dstName='HoursElapsed' />
+			<field type='bool' srcName='fOpen' dstName='IsOpen' />
+		</fields>
+	</mapping>
+	<mapping src='FogBugzIntervalApiObj' dst='FogBugzInterval' apiEnumName='Intervals'>
+		<fields>
+			<field type='int' srcName='ixBug' dstName='CaseId'/>
+			<field type='int' srcName='ixInterval' dstName='IntervalId'/>
+			<field type='DateTime' srcName='dtStart' dstName='Start'/>
+			<field type='DateTime' srcName='dtEnd' dstName='End'/>
+			<field type='string' srcName='sTitle' dstName='CaseTitle'/>
+			<field type='int' srcName='ixPerson' dstName='PersonId'/>
+			<field type='bool' srcName='fDeleted' dstName='Deleted'/>
+		</fields>
+	</mapping>
+	<mapping src='FogBugzPersonApiObj' dst='FogBugzPerson' apiEnumName='People'>
+		<fields>
+			<field type='int' srcName='ixPerson' dstName='PersonId'/>
+			<field type='string' srcName='sFullName' dstName='FullName'/>
+			<field type='string' srcName='sEmail' dstName='Email'/>
+			<field type='string' srcName='sPhone' dstName='Phone'/>
+			<field type='bool' srcName='fAdministrator' dstName='IsAdministrator'/>
+			<field type='bool' srcName='fCommunity' dstName='IsCommunity'/>
+			<field type='bool' srcName='fVirtual' dstName='IsVirtual'/>
+			<field type='bool' srcName='fDeleted' dstName='IsDeleted'/>
+			<field type='bool' srcName='fNotify' dstName='IsNotify'/>
+			<field type='string' srcName='sHomepage' dstName='Homepage'/>
+			<field type='string' srcName='sLocale' dstName='Locale'/>
+			<field type='string' srcName='sLanguage' dstName='Language'/>
+			<field type='string' srcName='sTimeZoneKey' dstName='TimeZoneKey'/>
+			<field type='string' srcName='sLDAPUid' dstName='LDAPUId'/>
+			<field type='DateTime' srcName='dtLastActivity' dstName='LastActivity'/>
+			<field type='bool' srcName='fRecurseBugChildren' dstName='RecurseBugChildren'/>
+			<field type='bool' srcName='fPaletteExpanded' dstName='PaletteExpanded'/>
+			<field type='int' srcName='ixBugWorkingOn' dstName='WorkingOnCaseId'/>
+			<field type='string' srcName='sFrom' dstName='From'/>
+		</fields>
+	</mapping>
+	<mapping src='FogBugzProjectApiObj' dst='FogBugzProject' apiEnumName='Projects'>
+		<fields>
+			<field type='int' srcName='ixProject' dstName='ProjectId'/>
+			<field type='string' srcName='sProject' dstName='Name'/>
+			<field type='int' srcName='ixPersonOwner' dstName='OwnerPersonId'/>
+			<field type='string' srcName='sPersonOwner' dstName='OwnerPersonName'/>
+			<field type='string' srcName='sEmail' dstName='Email'/>
+			<field type='string' srcName='sPhone' dstName='Phone'/>
+			<field type='bool' srcName='fInbox' dstName='IsInbox'/>
+			<field type='int' srcName='iType' dstName='TypeId'/>
+			<field type='int' srcName='ixGroup' dstName='GroupId'/>
+			<field type='string' srcName='sGroup' dstName='GroupName'/>
+		</fields>
+	</mapping>
+	<mapping src='FogBugzStatusApiObj' dst='FogBugzStatus' apiEnumName='Statuses'>
+		<fields>
+			<field type='int' srcName='ixStatus' dstName='StatusId'/>
+			<field type='string' srcName='sStatus' dstName='Name'/>
+			<field type='int' srcName='ixCategory' dstName='CategoryId'/>
+			<field type='bool' srcName='fWorkDone' dstName='IsWorkDone'/>
+			<field type='bool' srcName='fResolved' dstName='IsResolved'/>
+			<field type='bool' srcName='fDuplicate' dstName='IsDuplicate'/>
+			<field type='bool' srcName='fDeleted' dstName='IsDeleted'/>
+			<field type='int' srcName='iOrder' dstName='OrderId'/>
+		</fields>
+	</mapping>
+</mappings>
+");
+
+
+#>
+using System;
+using System.Collections.Generic;
+
+/*****
+ ***** GENERATED FILE - DO NOT EDIT
+ ****/
+namespace FogBugzApi
+{
+/// <summary>
+/// Options class for querying FogBugz cases
+/// </summary>
+public static class CaseQueryOptions
+{
+	public static readonly string QueryColumns = "<#= string.Join(",", (from m in xdoc.Elements("mapping") from f in m.Elements("fields").Elements().Attributes("srcName") where m.Attribute("src").Value == "FogBugzCaseApiObj" select f.Value).ToArray()) #>";
+}
+<# 
+	// Create all classes
+	foreach ( var m in xdoc.Elements("mapping") )
+	{
+#>
+// Begin - Src Mapping Class
+public class <#= m.Attribute("src").Value #>
+{
+	<#
+	foreach ( var f in m.Elements("fields").Elements("field") )
+	{
+	#>
+	public <#= f.Attribute("type").Value #> <#= f.Attribute("srcName").Value #> { get; set; }
+	<# } // foreach  #>
+
+} // End - Src Mapping Class
+
+// Begin - Src List Class
+public class <#= m.Attribute("src").Value #>List
+{
+	public List<<#= m.Attribute("src").Value #>> <#= m.Attribute("apiEnumName").Value #> { get; set; }
+}
+// End - Src List Class
+
+// Begin - Dst Mapping Class
+public class <#= m.Attribute("dst").Value #>
+{
+	<#
+	foreach ( var f in m.Elements("fields").Elements("field") )
+	{
+	#>
+	public <#= f.Attribute("type").Value #> <#= f.Attribute("dstName").Value #> { get; set; }
+	<# } // foreach  #>
+
+} // End - Dst Mapping Class
+
+<#
+	} // foreach 
+#>
+
+// Class for mapping types
+public static class ApiTypeMapper
+{
+	/// <summary>
+	/// Initialize api object type mappings
+	/// </summary>
+	public static void InitMappings()
+	{
+	<# // Create mappings
+	foreach ( var m in xdoc.Elements("mapping") )
+	{
+	#>
+	AutoMapper.Mapper.CreateMap<<#= m.Attribute("src").Value #>, <#= m.Attribute("dst").Value #>>()
+	<#foreach ( var f in m.Elements("fields").Elements("field") )
+	{
+	#>
+		.ForMember(d => d.<#= f.Attribute("dstName").Value #>, o => o.MapFrom(s => s.<#= f.Attribute("srcName").Value #>))	
+	<# } // foreach  #>
+	;
+	<#}#>
+
+	} // InitMappings	
+
+	/// <summary>
+    /// Mapping to destination type
+    /// </summary>
+    /// <typeparam name="TDestination"></typeparam>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    public static TDestination Map<TDestination>(object source)
+    {
+        return AutoMapper.Mapper.Map<TDestination>(source);
+    }
+
+} // class
+
+
+
+} // namespace
