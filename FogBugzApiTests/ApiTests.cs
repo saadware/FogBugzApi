@@ -13,7 +13,7 @@ namespace FogBugzApiTests
         /// <summary>
         /// Api
         /// </summary>
-        static FogBugzApiWrapper apiWrapper;
+        static ApiWrapper apiWrapper;
 
         /// <summary>
         /// Test context
@@ -26,7 +26,7 @@ namespace FogBugzApiTests
             testContext = context;
             string url = ConfigurationManager.AppSettings["FogBugzUrl"];
             string token = ConfigurationManager.AppSettings["ApiToken"];
-            apiWrapper = new FogBugzApiWrapper(url, token);
+            apiWrapper = new ApiWrapper(url, token);
         }
 
         [TestMethod]

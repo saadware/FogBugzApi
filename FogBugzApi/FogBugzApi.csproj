@@ -54,8 +54,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FogBugzApi.cs" />
-    <Compile Include="FogBugzApiInfo.cs" />
+    <Compile Include="ApiWrapper.cs" />
+    <Compile Include="ApiInfo.cs" />
     <Compile Include="Generated\ApiTypeMapper.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -9,7 +9,7 @@ namespace FogBugzApi
     /// <summary>
     /// Information on the API
     /// </summary>
-    public class FogBugzApiInfo
+    public class ApiInfo
     {
         public string Version { get; set; }
         public string MinVersion { get; set; }

@@ -8,12 +8,12 @@ namespace FogBugzApi
     /// <summary>
     /// Wrapper class for API to FogBugz
     /// </summary>
-    public class FogBugzApiWrapper
+    public class ApiWrapper
     {
         /// <summary>
         /// Information on the API
         /// </summary>
-        public FogBugzApiInfo ApiInfo { get; private set; }
+        public ApiInfo ApiInfo { get; private set; }
 
         /// <summary>
         /// Base Url for FogBugz instance
@@ -29,7 +29,7 @@ namespace FogBugzApi
         /// Ctor
         /// </summary>
         /// <param name="url"></param>
-        public FogBugzApiWrapper(string url, string token)
+        public ApiWrapper(string url, string token)
         {
             ApiTypeMapper.InitMappings();
 
@@ -38,7 +38,7 @@ namespace FogBugzApi
             Uri siteUrl = new Uri(url);
             var client = new RestClient(url);
             var req = new RestRequest(new Uri(siteUrl, "api.xml"));
-            var response = client.Execute<FogBugzApiInfo>(req);
+            var response = client.Execute<ApiInfo>(req);
             if (response.ErrorException != null)
             {
                 const string msg = "Error retrieving response. Check inner details for more info";
