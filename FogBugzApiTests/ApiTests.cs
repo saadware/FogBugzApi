@@ -1,13 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using FogBugzApi;
 using System.Configuration;
 using System.Linq;
+using NUnit.Framework;
+using FogBugzApi;
 
 namespace FogBugzApiTests
 {
-    [TestClass]
+    [TestFixture]
     public class ApiTests
     {
         /// <summary>
@@ -15,21 +15,15 @@ namespace FogBugzApiTests
         /// </summary>
         static ApiWrapper apiWrapper;
 
-        /// <summary>
-        /// Test context
-        /// </summary>
-        static TestContext testContext;
-
-        [ClassInitialize]
-        public static void Init(TestContext context)
+        [TestFixtureSetUp]
+        public static void Init()
         {
-            testContext = context;
             string url = ConfigurationManager.AppSettings["FogBugzUrl"];
             string token = ConfigurationManager.AppSettings["ApiToken"];
             apiWrapper = new ApiWrapper(url, token);
         }
 
-        [TestMethod]
+        [Test]
         public void TestInfo()
         {
             Assert.AreEqual("api.asp?", apiWrapper.ApiInfo.Url);
@@ -37,7 +31,7 @@ namespace FogBugzApiTests
             Assert.AreEqual("8", apiWrapper.ApiInfo.Version);
         }
 
-        [TestMethod]
+        [Test]
         public void TestProjects()
         {
             Assert.IsNotNull(apiWrapper.Projects);
@@ -45,7 +39,7 @@ namespace FogBugzApiTests
             Assert.AreNotEqual(string.Empty, apiWrapper.Projects[0].Name);
         }
 
-        [TestMethod]
+        [Test]
         public void TestIntervals()
         {
             IList<FogBugzInterval> intervals = apiWrapper.GetIntervals(DateTime.Today.AddDays(-14), DateTime.Today, true);
@@ -54,14 +48,14 @@ namespace FogBugzApiTests
             Assert.IsFalse(string.IsNullOrEmpty(intervals[0].CaseTitle));
         }
 
-        [TestMethod]
+        [Test]
         public void TestPeople()
         {
             Assert.IsNotNull(apiWrapper.People);
             Assert.AreNotEqual(0, apiWrapper.People.Count);            
         }
 
-        [TestMethod]
+        [Test]
         public void TestPeopleIntervalsWithThrash()
         {
             var intervals = (from i in apiWrapper.GetIntervals(DateTime.Today.AddDays(-14), DateTime.Today, true)

@@ -18,9 +18,8 @@ build/
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
 
-# MSTest test Results
-[Tt]est[Rr]esult*/
-[Bb]uild[Ll]og.*
+# test results
+FogBugzApiTests/[Tt]est-[Rr]esult*/
 
 *.swp
 *_i.c
@@ -124,3 +123,6 @@ UpgradeLog*.htm
 # SQL Server files
 App_Data/*.mdf
 App_Data/*.ldf
+
+# MonoDevelop prefs
+*.userprefs
