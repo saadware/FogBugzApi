@@ -5,7 +5,6 @@ FogBugzApi is a simple and modern .NET wrapper for the [FogBugz Xml
 API](https://developers.fogbugz.com/default.asp?W194)
 system. 
 
-
 Goals
 =========================
 * Query the FogBugz system using LINQ.
@@ -15,11 +14,16 @@ Goals
 
 Status/Issues
 =========================
-* Currently usable yet in very primitive.
+* Currently alpha status yet usable.
 * In hopes of not having to mess with passwords, the `ApiWrapper` 
 class takes your FogBugz instance url along with a token that has been
 previously acquired by other means. This is most likely going to change
 in the near future.
+
+Installation
+=========================
+Install the pre release version from the 
+[nuget package](https://www.nuget.org/packages/FogBugzApi/).
 
 Usage
 =========================
