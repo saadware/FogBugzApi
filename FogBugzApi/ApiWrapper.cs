@@ -35,7 +35,7 @@ namespace FogBugzApi
 
             apiToken = token;
 
-            Uri siteUrl = new Uri(url);
+            var siteUrl = new Uri(url);
             var client = new RestClient(url);
             var req = new RestRequest(new Uri(siteUrl, "api.xml"));
             var response = client.Execute<ApiInfo>(req);
@@ -52,23 +52,20 @@ namespace FogBugzApi
         /// Gets list of projects
         /// </summary>
         /// <returns></returns>
-        public IList<FogBugzProject> Projects
+        public IEnumerable<FogBugzProject> GetProjects()
         {
-            get
-            {
-                var request = new RestRequest();
-                request.AddParameter("cmd", "listProjects");
-                var projects = (from p in Execute<FogBugzProjectApiObjList>(request).Projects
-                                select ApiTypeMapper.Map<FogBugzProject>(p)).ToList();
-                return projects;
-            }
+            var request = new RestRequest();
+            request.AddParameter("cmd", "listProjects");
+            var projects = (from p in Execute<FogBugzProjectApiObjList>(request).Projects
+                            select ApiTypeMapper.Map<FogBugzProject>(p));
+            return projects;
         }
 
         /// <summary>
         /// Gets a list of intervals
         /// </summary>
         /// <returns></returns>
-        public IList<FogBugzInterval> GetIntervals(DateTime? start, DateTime? end, bool? all)
+        public IEnumerable<FogBugzInterval> GetIntervals(DateTime? start, DateTime? end, bool? all)
         {
             var request = new RestRequest();
             request.AddParameter("cmd", "listIntervals");
@@ -86,38 +83,35 @@ namespace FogBugzApi
                 request.AddParameter("ixPerson", 1);
             }
             var intervals = (from p in Execute<FogBugzIntervalApiObjList>(request).Intervals
-                             select ApiTypeMapper.Map<FogBugzInterval > (p)).ToList();
-            return intervals;            
+                             select ApiTypeMapper.Map<FogBugzInterval>(p));
+            return intervals;
         }
 
         /// <summary>
-        /// Get list of people 
+        /// Get people 
         /// </summary>
         /// <returns></returns>
-        public IList<FogBugzPerson> People
+        public IEnumerable<FogBugzPerson> GetPeople()
         {
-            get
-            {
-                var request = new RestRequest();
-                request.AddParameter("cmd", "listPeople");
-                var people = (from p in Execute<FogBugzPersonApiObjList>(request).People
-                              select ApiTypeMapper.Map<FogBugzPerson>(p)).ToList();
-                return people;
-            }
+            var request = new RestRequest();
+            request.AddParameter("cmd", "listPeople");
+            var people = (from p in Execute<FogBugzPersonApiObjList>(request).People
+                          select ApiTypeMapper.Map<FogBugzPerson>(p));
+            return people;
         }
 
         /// <summary>
-        /// Get list of cases
+        /// Get cases
         /// </summary>
         /// <returns></returns>
-        public IList<FogBugzCase> GetCases(IList<int> caseIds)
+        public IEnumerable<FogBugzCase> GetCases(IList<int> caseIds)
         {
             var request = new RestRequest();
             request.AddParameter("cmd", "search");
             request.AddParameter("q", string.Join(",", caseIds));
             request.AddParameter("cols", CaseQueryOptions.QueryColumns);
             var cases = (from p in Execute<FogBugzCaseApiObjList>(request).Cases
-                         select ApiTypeMapper.Map<FogBugzCase>(p)).ToList();
+                         select ApiTypeMapper.Map<FogBugzCase>(p));
             return cases;
         }
 
@@ -125,16 +119,13 @@ namespace FogBugzApi
         /// Get list of statuses
         /// </summary>
         /// <returns></returns>
-        public IList<FogBugzStatus> Statuses
+        public IEnumerable<FogBugzStatus> GetStatuses()
         {
-            get
-            {
-                var request = new RestRequest();
-                request.AddParameter("cmd", "listStatuses");
-                var statuses = (from s in Execute<FogBugzStatusApiObjList>(request).Statuses
-                                select ApiTypeMapper.Map<FogBugzStatus>(s)).ToList();
-                return statuses;
-            }
+            var request = new RestRequest();
+            request.AddParameter("cmd", "listStatuses");
+            var statuses = (from s in Execute<FogBugzStatusApiObjList>(request).Statuses
+                            select ApiTypeMapper.Map<FogBugzStatus>(s));
+            return statuses;
         }
 
         /// <summary>
@@ -143,7 +134,7 @@ namespace FogBugzApi
         /// <typeparam name="T"></typeparam>
         /// <param name="request"></param>
         /// <returns></returns>
-        T Execute<T>(RestRequest request) where T : new()
+        T Execute<T>(IRestRequest request) where T : new()
         {
             var client = new RestClient(baseApiUrl.AbsoluteUri);
             request.AddParameter("token", apiToken);
