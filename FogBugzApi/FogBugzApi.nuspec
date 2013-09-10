@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <projectUrl>https://github.com/saadware/FogBugzApi</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <language>en-US</language>
+    <releaseNotes>Initial alpha release.</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>fogcreek fogbugz api</tags>
+    <dependencies>
+      <dependency id="AutoMapper" version="2.2.1" />
+      <dependency id="RestSharpSigned" version="104.1" />
+    </dependencies>
+  </metadata>
+</package>
