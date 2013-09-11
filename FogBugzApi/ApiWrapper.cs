@@ -4,7 +4,7 @@ using System.Linq;
 using RestSharp;
 
 namespace FogBugzApi
-{      
+{
     /// <summary>
     /// Wrapper class for API to FogBugz
     /// </summary>
@@ -18,34 +18,37 @@ namespace FogBugzApi
         /// <summary>
         /// Base Url for FogBugz instance
         /// </summary>
-        Uri baseApiUrl;
+        readonly Uri _baseApiUrl;
 
         /// <summary>
         /// Token used to authenticate all API calls
         /// </summary>
-        string apiToken;
+        readonly string _apiToken;
 
         /// <summary>
         /// Ctor
         /// </summary>
-        /// <param name="url"></param>
+        /// <param name="url">FogBugz instance url
+        /// <example>https://company.fogbugz.com</example>
+        /// </param>
+        /// <param name="token">FogBugz token retrieved by the API call to logon</param>
         public ApiWrapper(string url, string token)
         {
             ApiTypeMapper.InitMappings();
 
-            apiToken = token;
+            _apiToken = token;
 
             var siteUrl = new Uri(url);
             var client = new RestClient(url);
             var req = new RestRequest(new Uri(siteUrl, "api.xml"));
             var response = client.Execute<ApiInfo>(req);
-            if (response.ErrorException != null)
+            if (response != null && response.ErrorException != null)
             {
                 const string msg = "Error retrieving response. Check inner details for more info";
                 throw new ApplicationException(msg, response.ErrorException);
             }
             ApiInfo = response.Data;
-            baseApiUrl = new Uri(siteUrl, ApiInfo.Url.TrimEnd('?'));
+            _baseApiUrl = new Uri(siteUrl, ApiInfo.Url.TrimEnd('?'));
         }
 
         /// <summary>
@@ -62,10 +65,22 @@ namespace FogBugzApi
         }
 
         /// <summary>
-        /// Gets a list of intervals
+        /// Gets all intervals of work for the currently logged in user.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<FogBugzInterval> GetIntervals(DateTime? start, DateTime? end, bool? all)
+        public IEnumerable<FogBugzInterval> GetIntervals()
+        {
+            return GetIntervals(null, null, false);
+        }
+
+        /// <summary>
+        /// Gets intervals of work based on date ranges and optionally for all people.
+        /// </summary>
+        /// <param name="start">start date</param>
+        /// <param name="end">end date</param>
+        /// <param name="allPeople">retrieve intervals for all people</param>
+        /// <returns/>
+        public IEnumerable<FogBugzInterval> GetIntervals(DateTime? start, DateTime? end, bool allPeople)
         {
             var request = new RestRequest();
             request.AddParameter("cmd", "listIntervals");
@@ -77,18 +92,18 @@ namespace FogBugzApi
             {
                 request.AddParameter("dtEnd", end.Value.ToUniversalTime().ToString("s"));
             }
-            // Get for all people
-            if (all.HasValue)
+            // Get for all people?
+            if (allPeople)
             {
                 request.AddParameter("ixPerson", 1);
             }
-            var intervals = (from p in Execute<FogBugzIntervalApiObjList>(request).Intervals
-                             select ApiTypeMapper.Map<FogBugzInterval>(p));
+            var intervals = from p in Execute<FogBugzIntervalApiObjList>(request).Intervals
+                            select ApiTypeMapper.Map<FogBugzInterval>(p);
             return intervals;
         }
 
         /// <summary>
-        /// Get people 
+        /// Get all people 
         /// </summary>
         /// <returns></returns>
         public IEnumerable<FogBugzPerson> GetPeople()
@@ -101,7 +116,7 @@ namespace FogBugzApi
         }
 
         /// <summary>
-        /// Get cases
+        /// Get cases by caseId.
         /// </summary>
         /// <returns></returns>
         public IEnumerable<FogBugzCase> GetCases(IList<int> caseIds)
@@ -116,7 +131,7 @@ namespace FogBugzApi
         }
 
         /// <summary>
-        /// Get list of statuses
+        /// Get all statuses setup in FogBugz
         /// </summary>
         /// <returns></returns>
         public IEnumerable<FogBugzStatus> GetStatuses()
@@ -136,8 +151,8 @@ namespace FogBugzApi
         /// <returns></returns>
         T Execute<T>(IRestRequest request) where T : new()
         {
-            var client = new RestClient(baseApiUrl.AbsoluteUri);
-            request.AddParameter("token", apiToken);
+            var client = new RestClient(_baseApiUrl.AbsoluteUri);
+            request.AddParameter("token", _apiToken);
             var response = client.Execute<T>(request);
             if (response.ErrorException != null)
             {
