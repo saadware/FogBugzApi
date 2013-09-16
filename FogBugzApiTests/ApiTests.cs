@@ -41,15 +41,6 @@ namespace FogBugzApiTests
         }
 
         [Test]
-        public void TestIntervals()
-        {
-            IEnumerable<FogBugzInterval> intervals = apiWrapper.GetIntervals(DateTime.Today.AddDays(-14), DateTime.Today, true);
-            Assert.IsNotNull(intervals);
-            Assert.AreNotEqual(0, intervals.Count());
-            Assert.IsFalse(intervals.All(i => string.IsNullOrEmpty(i.CaseTitle)));
-        }
-
-        [Test]
         public void TestPeople()
         {
             IEnumerable<FogBugzPerson> people = apiWrapper.GetPeople();

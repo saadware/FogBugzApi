@@ -86,10 +86,22 @@ namespace FogBugzApi
             request.AddParameter("cmd", "listIntervals");
             if (start.HasValue)
             {
+                if (start > DateTime.Today)
+                {
+                    throw new ArgumentOutOfRangeException("start", start, "Invalid date specified");
+                }
                 request.AddParameter("dtStart", start.Value.ToUniversalTime().ToString("s"));
             }
             if (end.HasValue)
             {
+                if (end > DateTime.Today)
+				{
+                    throw new ArgumentOutOfRangeException("end", end, "Invalid date specified");
+                }
+                if (start.HasValue && start > end)
+                {
+                    throw new ArgumentOutOfRangeException("start", start, "Start date must come before end.");
+                }
                 request.AddParameter("dtEnd", end.Value.ToUniversalTime().ToString("s"));
             }
             // Get for all people?
